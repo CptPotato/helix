@@ -2,6 +2,8 @@ My customized helix build.
 
 Changes from `helix-editor:master`:
 
+- remove `rust-toolchain.toml` (use latest rust toolchain)
+
 ---
 
 <div align="center">
