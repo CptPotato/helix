@@ -19,7 +19,8 @@ impl ProgressSpinners {
 
 impl Default for Spinner {
     fn default() -> Self {
-        Self::dots(80)
+        Self::dots(100)
+        // Self::fira_code(100)
     }
 }
 
@@ -49,6 +50,15 @@ impl Spinner {
 
     pub fn dots(interval: u64) -> Self {
         Self::new(vec!["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"], interval)
+    }
+
+    pub fn fira_code(interval: u64) -> Self {
+        Self::new(
+            vec![
+                "\u{ee06}", "\u{ee07}", "\u{ee08}", "\u{ee09}", "\u{ee0a}", "\u{ee0b}",
+            ],
+            interval,
+        )
     }
 
     pub fn start(&mut self) {
