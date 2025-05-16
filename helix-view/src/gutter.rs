@@ -75,7 +75,7 @@ pub fn diagnostic<'doc>(
                         })
                 });
             diagnostics_on_line.max_by_key(|d| d.severity).map(|d| {
-                write!(out, "●").ok();
+                write!(out, "⦁").ok();
                 match d.severity {
                     Some(Severity::Error) => error,
                     Some(Severity::Warning) | None => warning,
@@ -120,14 +120,14 @@ pub fn diff<'doc>(
                 }
 
                 let (icon, style) = if hunk.is_pure_insertion() {
-                    ("▍", added)
+                    ("▎", added)
                 } else if hunk.is_pure_removal() {
                     if !first_visual_line {
                         return None;
                     }
                     ("▔", deleted)
                 } else {
-                    ("▍", modified)
+                    ("▎", modified)
                 };
 
                 write!(out, "{}", icon).unwrap();

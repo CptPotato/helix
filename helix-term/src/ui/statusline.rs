@@ -215,6 +215,13 @@ where
     );
 }
 
+// LSP icons for the statusbar
+// alternative (small dot): "⦁"
+const ICON_HINT: &str = "\u{ea74}";
+const ICON_INFO: &str = "\u{ea74}";
+const ICON_WARNING: &str = "\u{ea6c}";
+const ICON_ERROR: &str = "\u{ea87}";
+
 fn render_diagnostics<'a, F>(context: &mut RenderContext<'a>, write: F)
 where
     F: Fn(&mut RenderContext<'a>, Span<'a>) + Copy,
@@ -238,24 +245,30 @@ where
     for sev in &context.editor.config().statusline.diagnostics {
         match sev {
             Severity::Hint if hints > 0 => {
-                write(context, Span::styled("●", context.editor.theme.get("hint")));
+                write(
+                    context,
+                    Span::styled(ICON_HINT, context.editor.theme.get("hint")),
+                );
                 write(context, format!(" {} ", hints).into());
             }
             Severity::Info if info > 0 => {
-                write(context, Span::styled("●", context.editor.theme.get("info")));
+                write(
+                    context,
+                    Span::styled(ICON_INFO, context.editor.theme.get("info")),
+                );
                 write(context, format!(" {} ", info).into());
             }
             Severity::Warning if warnings > 0 => {
                 write(
                     context,
-                    Span::styled("●", context.editor.theme.get("warning")),
+                    Span::styled(ICON_WARNING, context.editor.theme.get("warning")),
                 );
                 write(context, format!(" {} ", warnings).into());
             }
             Severity::Error if errors > 0 => {
                 write(
                     context,
-                    Span::styled("●", context.editor.theme.get("error")),
+                    Span::styled(ICON_ERROR, context.editor.theme.get("error")),
                 );
                 write(context, format!(" {} ", errors).into());
             }
@@ -305,24 +318,30 @@ where
     for sev in sevs_to_show {
         match sev {
             Severity::Hint if hints > 0 => {
-                write(context, Span::styled("●", context.editor.theme.get("hint")));
+                write(
+                    context,
+                    Span::styled(ICON_HINT, context.editor.theme.get("hint")),
+                );
                 write(context, format!(" {} ", hints).into());
             }
             Severity::Info if info > 0 => {
-                write(context, Span::styled("●", context.editor.theme.get("info")));
+                write(
+                    context,
+                    Span::styled(ICON_INFO, context.editor.theme.get("info")),
+                );
                 write(context, format!(" {} ", info).into());
             }
             Severity::Warning if warnings > 0 => {
                 write(
                     context,
-                    Span::styled("●", context.editor.theme.get("warning")),
+                    Span::styled(ICON_WARNING, context.editor.theme.get("warning")),
                 );
                 write(context, format!(" {} ", warnings).into());
             }
             Severity::Error if errors > 0 => {
                 write(
                     context,
-                    Span::styled("●", context.editor.theme.get("error")),
+                    Span::styled(ICON_ERROR, context.editor.theme.get("error")),
                 );
                 write(context, format!(" {} ", errors).into());
             }

@@ -3,6 +3,11 @@ My customized helix build.
 Changes from `helix-editor:master`:
 
 - remove `rust-toolchain.toml` (use latest rust toolchain)
+- customize some glyphs
+  - small dot for diagnostics `⦁`
+  - thinner git gutter
+  - Fira Code spinner as LSP spinner
+- themed statusline separator
 
 ---
 

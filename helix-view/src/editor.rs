@@ -512,6 +512,8 @@ pub struct StatusLineConfig {
     pub right: Vec<StatusLineElement>,
     pub separator: String,
     pub mode: ModeConfig,
+    /// Seperator after statusline mode. Best used with 'color-modes = true'. Defaults to "".
+    pub mode_separator: String,
     pub diagnostics: Vec<Severity>,
     pub workspace_diagnostics: Vec<Severity>,
 }
@@ -538,6 +540,7 @@ impl Default for StatusLineConfig {
             ],
             separator: String::from("│"),
             mode: ModeConfig::default(),
+            mode_separator: String::from(""),
             diagnostics: vec![Severity::Warning, Severity::Error],
             workspace_diagnostics: vec![Severity::Warning, Severity::Error],
         }
