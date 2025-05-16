@@ -762,22 +762,27 @@ fn move_line_down(cx: &mut Context) {
     move_impl(cx, move_vertically, Direction::Forward, Movement::Move)
 }
 
+fn multi_selection(cx: &mut Context) -> bool {
+    let (view, doc) = current!(cx.editor);
+    doc.selection(view.id).iter().nth(1).is_some()
+}
+
 fn move_visual_line_up(cx: &mut Context) {
-    move_impl(
-        cx,
-        move_vertically_visual,
-        Direction::Backward,
-        Movement::Move,
-    )
+    let move_fn = if multi_selection(cx) {
+        move_vertically
+    } else {
+        move_vertically_visual
+    };
+    move_impl(cx, move_fn, Direction::Backward, Movement::Move)
 }
 
 fn move_visual_line_down(cx: &mut Context) {
-    move_impl(
-        cx,
-        move_vertically_visual,
-        Direction::Forward,
-        Movement::Move,
-    )
+    let move_fn = if multi_selection(cx) {
+        move_vertically
+    } else {
+        move_vertically_visual
+    };
+    move_impl(cx, move_fn, Direction::Forward, Movement::Move)
 }
 
 fn extend_char_left(cx: &mut Context) {
