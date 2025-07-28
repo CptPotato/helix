@@ -4166,10 +4166,10 @@ pub mod insert {
         let (view, doc) = current_ref!(cx.editor);
         let view_id = view.id;
 
-        if matches!(
-            cx.editor.config().smart_tab,
-            Some(SmartTabConfig { enable: true, .. })
-        ) {
+        if let Some(SmartTabConfig {
+            enable: true, dumb, ..
+        }) = cx.editor.config().smart_tab
+        {
             let cursors_after_whitespace = doc.selection(view_id).ranges().iter().all(|range| {
                 let cursor = range.cursor(doc.text().slice(..));
                 let current_line_num = doc.text().char_to_line(cursor);
@@ -4181,6 +4181,104 @@ pub mod insert {
             if !cursors_after_whitespace {
                 if doc.active_snippet.is_some() {
                     goto_next_tabstop(cx);
+                } else if dumb {
+                    let motion = move |editor: &mut Editor| {
+                        fn is_punctuation(ch: char) -> bool {
+                            match ch {
+                                '.' | ':' | ',' | ';' | '+' | '-' | '*' | '/' | '=' | '!' | '^'
+                                | '~' | '$' | '%' | '"' | '(' | ')' | '[' | ']' | '{' | '}' | '<'
+                                | '>' | '?' | '#' | '@' | '\\' => true,
+                                _ => false,
+                            }
+                        }
+                        fn is_multi_punctuation(ch_prev: char, ch: char) -> bool {
+                            match (ch_prev, ch) {
+                                ('.', '.')
+                                | ('|', '|')
+                                | ('&', '&')
+                                | ('+', '+')
+                                | ('-', '-')
+                                | ('*', '*')
+                                | ('/', '/')
+                                | (':', ':')
+                                | ('\\', '\\')
+                                | ('#', '#')
+                                | ('>', '>')
+                                | ('<', '<')
+                                | ('.', '{')
+                                | (_, '=') => true,
+                                _ => false,
+                            }
+                        }
+                        fn is_whitespace(ch: char) -> bool {
+                            ch.is_whitespace() && ch != '\n'
+                        }
+                        #[derive(Clone, Copy, Eq, PartialEq)]
+                        enum WhitespaceState {
+                            None,
+                            Skipping,
+                            Skipped,
+                        }
+
+                        let (view, doc) = current!(editor);
+                        let text = doc.text().slice(..);
+                        let current_selection = doc.selection(view.id);
+
+                        let new_ranges = current_selection
+                            .ranges()
+                            .into_iter()
+                            .copied()
+                            .map(|mut s| {
+                                // Skip past the next punctuation including whitespace.
+                                // new_pos is (new position, last char, skipped whitespace)
+                                let mut new_pos: Option<(usize, char, WhitespaceState)> = None;
+                                let pos = s.anchor.max(s.head) - 1;
+                                for (i, ch) in text.chars_at(pos).enumerate() {
+                                    if let Some(p) = &mut new_pos {
+                                        let is_whitespace = is_whitespace(ch);
+                                        if (is_whitespace && p.2 != WhitespaceState::Skipped)
+                                            || (is_multi_punctuation(p.1, ch)
+                                                && p.2 == WhitespaceState::None)
+                                        {
+                                            p.0 = pos + i + 1;
+                                            p.1 = ch;
+                                            p.2 = match (is_whitespace, p.2) {
+                                                (true, WhitespaceState::None) => {
+                                                    WhitespaceState::Skipping
+                                                }
+                                                (false, WhitespaceState::None) => {
+                                                    WhitespaceState::None
+                                                }
+                                                (true, WhitespaceState::Skipping) => {
+                                                    WhitespaceState::Skipping
+                                                }
+                                                (false, WhitespaceState::Skipping) => {
+                                                    WhitespaceState::Skipped
+                                                }
+                                                (_, WhitespaceState::Skipped) => {
+                                                    WhitespaceState::Skipped
+                                                }
+                                            };
+                                        } else {
+                                            break;
+                                        }
+                                    }
+                                    if is_punctuation(ch) {
+                                        new_pos = Some((pos + i + 1, ch, WhitespaceState::None));
+                                    }
+                                }
+                                if let Some((pos, _, _)) = new_pos {
+                                    s = Range::new(pos, pos).min_width_1(text);
+                                }
+                                s
+                            })
+                            .collect();
+                        doc.set_selection(
+                            view.id,
+                            Selection::new(new_ranges, current_selection.primary_index()),
+                        );
+                    };
+                    cx.editor.apply_motion(motion);
                 } else {
                     move_parent_node_end(cx);
                 }

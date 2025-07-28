@@ -387,6 +387,7 @@ pub struct Config {
 #[serde(default, rename_all = "kebab-case", deny_unknown_fields)]
 pub struct SmartTabConfig {
     pub enable: bool,
+    pub dumb: bool,
     pub supersede_menu: bool,
 }
 
@@ -394,6 +395,7 @@ impl Default for SmartTabConfig {
     fn default() -> Self {
         SmartTabConfig {
             enable: true,
+            dumb: false,
             supersede_menu: false,
         }
     }
